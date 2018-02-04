@@ -37,7 +37,7 @@ function actionify(state, entryexit, startstop) {
     if (typeof state.activities == 'string') {
       state.activities = [ state.activities ];
     }
-    state.activities.forEach(item => state[entryexit].push(`${startstop}(${item})`));
+    state.activities.forEach(item => state[entryexit].push(`${startstop}${item}`));
 }
 
 function makeActivities(state) {
@@ -53,10 +53,13 @@ function makeActivities(state) {
   return state;
 }
 
-exports.handleActions = function(actions, startstop, fn) {
+exports.handleActions = function(actions, startstop, emitter) {
+  const filter = (startstop == 'start') ? start : (startstop == 'stop') ? stop : undefined;
+  if (! filter) throw new Error("use start or stop please!");
+
   actions
-    .filter(item => item.startsWith(startstop))
-    .map(item => item.substring(startstop.length))
-    .forEach(item => fn(item));
-}
+    .filter(item => item.startsWith(filter))
+    .map(item => item.substring(filter.length))
+    .forEach(item => emitter.emit(item));
+};
 
