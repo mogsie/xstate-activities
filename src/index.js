@@ -53,13 +53,16 @@ function makeActivities(state) {
   return state;
 }
 
-exports.handleActions = function(actions, startstop, emitter) {
-  const filter = (startstop == 'start') ? start : (startstop == 'stop') ? stop : undefined;
-  if (! filter) throw new Error("use start or stop please!");
-
-  actions
-    .filter(item => item.startsWith(filter))
-    .map(item => item.substring(filter.length))
-    .forEach(item => emitter.emit(item));
+exports.filterActions = function(allActions) {
+  const actions = allActions
+        .filter(item => !item.startsWith(start))
+        .filter(item => !item.startsWith(stop));
+  const toStop = allActions
+        .filter(item => item.startsWith(stop))
+        .map(item => item.substring(stop.length));
+  const toStart = allActions
+        .filter(item => item.startsWith(start))
+        .map(item => item.substring(start.length));
+  return {toStop, toStart, actions};
 };
 

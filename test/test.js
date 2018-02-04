@@ -1,4 +1,3 @@
-const EventEmitter = require('events');
 const xstate = require('xstate');
 const activities = require('../src');
 const definition = {
@@ -14,36 +13,20 @@ const definition = {
   }
 };
 
-const start = new EventEmitter();
-start.on('foo', () => console.log("starting foo"));
-start.on('bar', () => console.log("starting bar"));
-
-const stop = new EventEmitter();
-stop.on('foo', () => console.log("stopping foo"));
-stop.on('bar', () => console.log("stopping bar"));
-
 const machine = new xstate.Machine(activities.preprocess(definition));
 
 let state = machine.initialState;
 
-activities.handleActions(state.actions, 'stop', stop);
-activities.handleActions(state.actions, 'start', start);
+var { toStop, toStart, actions } = activities.filterActions(state.actions);
 
-// TODO filter out the actions that are handled above.
-console.log(state.actions);
-// [ 'xstate.activity.start (foo)' ]
-
+console.log('stop', toStop);
+console.log('start', toStart);
+console.log('actions', actions);
 
 state = machine.transition(state, 'e');
+var { toStop, toStart, actions } = activities.filterActions(state.actions);
 
-
-activities.handleActions(state.actions, 'stop', stop);
-activities.handleActions(state.actions, 'start', start);
-
-console.log(state.actions);
-//  [ 'xstate.activity.stop (foo)',           
-//   'xstate.activity.start (foo)',          
-//   'xstate.activity.start (bar)' ] 
-
-
+console.log('stop', toStop);
+console.log('start', toStart);
+console.log('actions', actions);
 
